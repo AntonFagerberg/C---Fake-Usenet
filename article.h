@@ -6,7 +6,7 @@
 
 class Article {
 public:
-	Article(std::string, std::string, std::string, int);
+	Article(std::string, std::string, std::string, int, int, time_t);
 	void print();
 	int ng_id;
 	int id;
@@ -14,6 +14,7 @@ public:
 	std::string author;
 	std::string text;
 	time_t updated;
+	static void set_count(int);
 private:
 	static int count;
 };

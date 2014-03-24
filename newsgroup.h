@@ -5,10 +5,11 @@
 
 class Newsgroup {
 public:
-	Newsgroup(std::string);
+	Newsgroup(std::string, int);
 	void print();
 	int id;
 	std::string name;
+	static void set_count(int);
 private:
 	static int count;
 };
