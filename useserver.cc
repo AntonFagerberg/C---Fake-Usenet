@@ -9,7 +9,7 @@
 
 using namespace std;
 
-UseServer::UseServer(int port) : server(port) {
+UseServer::UseServer(int port, bool saveInMemory) : server(port), db(saveInMemory) {
   if (!server.isReady()) {
     cerr << "[Server error] Initialization error. Shutting down." << endl;
     exit(1);
@@ -18,12 +18,12 @@ UseServer::UseServer(int port) : server(port) {
   listen();
 }
 
-void UseServer::write_num(unsigned int i, const std::shared_ptr<Connection> conn) {
+void UseServer::write_num(int i, const std::shared_ptr<Connection> conn) {
   conn->write(Protocol::PAR_NUM);
   write_int(i, conn);
 }
 
-unsigned int UseServer::read_num(const std::shared_ptr<Connection> conn) {
+int UseServer::read_num(const std::shared_ptr<Connection> conn) {
   expect_response(Protocol::PAR_NUM, conn);
   return read_int(conn);
 }
@@ -48,7 +48,7 @@ string UseServer::read_string(const std::shared_ptr<Connection> conn) {
   return s;
 }
 
-unsigned int UseServer::read_int(const std::shared_ptr<Connection> conn) {
+int UseServer::read_int(const std::shared_ptr<Connection> conn) {
   return (conn->read() << 24) | (conn->read() << 16) | (conn->read() << 8) | conn->read();
 }
 
@@ -249,19 +249,21 @@ void UseServer::listen() {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 2) {
-    cerr << "[Server error] Usage userserver port-number. Shutting down." << endl;
+  if (argc != 3) {
+    cerr << "[Server error] Usage userserver port-number(int) save-in-memory(1/0). Shutting down." << endl;
     exit(1);
   }
 
   int unsigned port;
+  bool saveInMemory;
 
   try {
     port = stoi(argv[1]);
+    saveInMemory = stoi(argv[2]);
   } catch (exception &e) {
     cerr << "[Server error] Unable to parse port number. Shutting down." << endl;
     exit(1);
   }
 
-  UseServer u(port);
+  UseServer u(port, saveInMemory);
 }

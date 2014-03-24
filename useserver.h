@@ -7,7 +7,7 @@
 
 class UseServer {
 public:
-  UseServer(int port);
+  UseServer(int, bool);
 private:
   void listen();
   void com_list_ng(const std::shared_ptr<Connection>);
@@ -23,11 +23,11 @@ private:
   std::string read_string(const std::shared_ptr<Connection>);
   void write_string(const std::string, const std::shared_ptr<Connection>);
 
-  void write_num(unsigned int, const std::shared_ptr<Connection>);
-  unsigned int read_num(const std::shared_ptr<Connection>);
+  void write_num(int, const std::shared_ptr<Connection>);
+  int read_num(const std::shared_ptr<Connection>);
 
   void write_int(int, const std::shared_ptr<Connection>);
-  unsigned int read_int(const std::shared_ptr<Connection>);
+  int read_int(const std::shared_ptr<Connection>);
 
   Server server;
   Db db;

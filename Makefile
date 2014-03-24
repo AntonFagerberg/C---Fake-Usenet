@@ -16,12 +16,13 @@ CXXFLAGS += -std=c++11
 #CXXFLAGS += -stdlib=libc++
 #LDFLAGS += -stdlib=libc++
 
-all: useserver
+all: useserver useclient
 
 # Create the library; ranlib is for Darwin and maybe other systems.
 # Doesn't seem to do any damage on other systems.
 
 useserver: libclientserver.a libdb.a
+useclient: libclientserver.a useclient.o
 
 libdb.a: db.o article.o newsgroup.o
 	ar rv libdb.a  db.o article.o newsgroup.o

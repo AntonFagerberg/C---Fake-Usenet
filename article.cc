@@ -6,7 +6,7 @@
 using namespace std;
 int Article::count = 0;
 
-Article::Article(string ti, string a, string te, int nid, int i, time_t tim) : title(ti), author(a), text(te), ng_id(nid){
+Article::Article(string ti, string a, string te, int nid, int i, time_t tim) :  ng_id(nid), title(ti), author(a), text(te) {
  	if (i==-1){
  		id = count++;
  	}else{
@@ -17,7 +17,6 @@ Article::Article(string ti, string a, string te, int nid, int i, time_t tim) : t
  	}else{
  		updated = tim;
  	}
- 	std::cout << id;
 }
 
 void Article::print(){
