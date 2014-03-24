@@ -78,6 +78,214 @@ void UseClient::com_list_ng() {
   expect_response(Protocol::ANS_END);
 }
 
+void UseClient::com_create_ng() {
+  string name;
+  cout << "Name> ";
+  cin >> name;
+
+  conn.write(Protocol::COM_CREATE_NG);
+  write_string(name);
+  conn.write(Protocol::COM_END);
+
+  expect_response(Protocol::ANS_CREATE_NG);
+  
+  switch (conn.read()) {
+    case Protocol::ANS_ACK:
+      cout << "Group created." << endl;
+      break;
+    case Protocol::ANS_NAK:
+      expect_response(Protocol::ERR_NG_ALREADY_EXISTS);
+      cout << "Group name already exists." << endl;
+      break;
+    default:
+      cerr << "Invalid response. Closing connection." << endl;
+      exit(1);
+      break;
+  }
+
+  expect_response(Protocol::ANS_END);
+}
+
+void UseClient::com_delete_ng() {
+  int id;
+  cout << "Id-number> ";
+  cin >> id;
+
+  conn.write(Protocol::COM_DELETE_NG);
+  write_num(id);
+  conn.write(Protocol::COM_END);
+
+  expect_response(Protocol::ANS_DELETE_NG);
+  switch (conn.read()) {
+    case Protocol::ANS_ACK:
+      cout << "Group deleted." << endl;
+      break;
+    case Protocol::ANS_NAK:
+      expect_response(Protocol::ERR_NG_DOES_NOT_EXIST);
+      cout << "Invalid group id." << endl;
+      break;
+    default:
+      cerr << "Invalid response. Closing connection." << endl;
+      exit(1);
+      break;
+  }
+  expect_response(Protocol::ANS_END);
+}
+
+void UseClient::com_list_art() {
+  int id;
+  cout << "Id-number> ";
+  cin >> id;
+
+  conn.write(Protocol::COM_LIST_ART);
+  write_num(id);
+  conn.write(Protocol::COM_END);
+
+  expect_response(Protocol::ANS_LIST_ART);
+  switch (conn.read()) {
+    case Protocol::ANS_ACK:
+      for (auto i = read_num(); i != 0; --i) {
+        cout << "[" << read_num() << "] " << read_string() << endl;
+      }
+      break;
+    case Protocol::ANS_NAK:
+      expect_response(Protocol::ERR_NG_DOES_NOT_EXIST);
+      cout << "Invalid group id." << endl;
+      break;
+    default:
+      cerr << "Invalid response. Closing connection." << endl;
+      exit(1);
+      break;
+  }
+
+  expect_response(Protocol::ANS_END);
+}
+
+void UseClient::com_create_art() {
+  int groupId;
+  string title, author, text, line;
+
+  cout << "Group id> ";
+  cin >> groupId;
+  cin.ignore(256, '\n');
+  cout << "Title> ";
+  getline(cin, title);
+  cout << "Author> ";
+  getline(cin, author);
+  cout << "Text (type '$' on a new line to end)>" << endl;
+  while (line != "$") {
+    text.append(line);
+    text.push_back('\n');
+    getline(cin, line);
+  }
+
+  conn.write(Protocol::COM_CREATE_ART);
+  write_num(groupId);
+  write_string(title);
+  write_string(author);
+  write_string(text);
+  conn.write(Protocol::COM_END);
+
+  expect_response(Protocol::ANS_CREATE_ART);
+  switch (conn.read()) {
+    case Protocol::ANS_ACK:
+      cout << "Article created." << endl;
+      break;
+    case Protocol::ANS_NAK:
+      expect_response(Protocol::ERR_NG_DOES_NOT_EXIST);
+      cout << "Not saved - invalid group id." << endl;
+      break;
+    default:
+      cerr << "Invalid response. Closing connection." << endl;
+      exit(1);
+      break;
+  }
+  expect_response(Protocol::ANS_END);
+}
+
+void UseClient::com_delete_art() {
+  int groupId, articleId;
+  cout << "Group id> ";
+  cin >> groupId;
+  cout << "Article id> ";
+  cin >> articleId;
+
+  conn.write(Protocol::COM_DELETE_ART);
+  write_num(groupId);
+  write_num(articleId);
+  conn.write(Protocol::COM_END);
+
+  expect_response(Protocol::ANS_DELETE_ART);
+
+  switch (conn.read()) {
+    case Protocol::ANS_ACK:
+      cout << "Article deleted." << endl;
+      break;
+    case Protocol::ANS_NAK:
+      switch (conn.read()) {
+        case Protocol::ERR_NG_DOES_NOT_EXIST:
+          cout << "Invalid group id." << endl;
+          break;
+        case Protocol::ERR_ART_DOES_NOT_EXIST:
+          cout << "Invalid article id." << endl;
+          break;
+        default:
+          cerr << "Invalid response. Closing connection." << endl;
+          exit(1);
+          break;
+      }
+      break;
+    default:
+      cerr << "Invalid response. Closing connection." << endl;
+      exit(1);
+      break;
+  }
+
+  expect_response(Protocol::ANS_END);
+}
+
+void UseClient::com_get_art() {
+  int groupId, articleId;
+  cout << "Group id> ";
+  cin >> groupId;
+  cout << "Article id> ";
+  cin >> articleId;
+
+  conn.write(Protocol::COM_GET_ART);
+  write_num(groupId);
+  write_num(articleId);
+  conn.write(Protocol::COM_END);
+
+  expect_response(Protocol::ANS_GET_ART);
+  switch (conn.read()) {
+    case Protocol::ANS_ACK:
+      cout << "Title: " << read_string() << endl;
+      cout << "Author: " << read_string() << endl;
+      cout << "Message:" << endl << read_string() << endl;
+      break;
+    case Protocol::ANS_NAK:
+      switch (conn.read()) {
+        case Protocol::ERR_NG_DOES_NOT_EXIST:
+          cout << "Invalid group id." << endl;
+          break;
+        case Protocol::ERR_ART_DOES_NOT_EXIST:
+          cout << "Invalid article id." << endl;
+          break;
+        default:
+          cerr << "Invalid response. Closing connection." << endl;
+          exit(1);
+          break;
+      }
+      break;
+    default:
+      cerr << "Invalid response. Closing connection." << endl;
+      exit(1);
+      break;
+  }
+
+  expect_response(Protocol::ANS_END);
+}
+
 void UseClient::run() {
   string cmd;
 
@@ -86,7 +294,7 @@ void UseClient::run() {
   }
 
   while (true) {
-    cout << "Command> ";
+    cout << "Command (or 'help')> ";
     cin >> cmd;
 
     if (cmd == "help") {
@@ -96,12 +304,29 @@ void UseClient::run() {
     } else {
       try {
         switch (stoi(cmd)) {
+          case 0:
+            cout << "Good bye!" << endl;
+            exit(0);
           case 1:
             com_list_ng();
             break;
-          default:
-            cout << "???" << endl;
+          case 2:
+            com_create_ng();
             break;
+          case 3:
+            com_delete_ng();
+            break;
+          case 4:
+            com_list_art();
+            break;
+          case 5:
+            com_create_art();
+            break;
+          case 6:
+            com_delete_art();
+            break;
+          case 7:
+            com_get_art();
         }
       } catch (invalid_argument) {
         cout << "Invalid argument: " << cmd << ". Type 'help' for commands." << endl;
@@ -110,7 +335,20 @@ void UseClient::run() {
   }
 }
 
-int main() {
-  //string addr = "localhost"
-  UseClient c("localhost", 1234);
+int main(int argc, char *argv[]) {
+  if (argc != 3) {
+    cerr << "[Client error] Usage 'userclient host-address(string) port-number(int)'. Shutting down." << endl;
+    exit(1);
+  }
+
+  int port;
+
+  try {
+    port = stoi(argv[2]);
+  } catch (exception &e) {
+    cerr << "[Client error] Unable to parse port number. Shutting down." << endl;
+    exit(1);
+  }
+
+  UseClient c(argv[1], port);
 }

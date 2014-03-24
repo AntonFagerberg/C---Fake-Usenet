@@ -100,6 +100,7 @@ void UseServer::com_create_ng(const std::shared_ptr<Connection> conn) {
 
 void UseServer::com_delete_ng(const std::shared_ptr<Connection> conn) {
   auto id = read_num(conn);
+  expect_response(Protocol::COM_END, conn);
 
   conn->write(Protocol::ANS_DELETE_NG);
   if (db.delete_newsgroup(id)) {
@@ -250,7 +251,7 @@ void UseServer::listen() {
 
 int main(int argc, char *argv[]) {
   if (argc != 3) {
-    cerr << "[Server error] Usage userserver port-number(int) save-in-memory(1/0). Shutting down." << endl;
+    cerr << "[Server error] Usage 'userserver port-number(int) save-in-memory(1/0)'. Shutting down." << endl;
     exit(1);
   }
 

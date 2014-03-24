@@ -11,6 +11,12 @@ public:
 private:
   void run();
   void com_list_ng();
+  void com_create_ng();
+  void com_delete_ng();
+  void com_list_art();
+  void com_create_art();
+  void com_delete_art();
+  void com_get_art();
 
   void expect_response(unsigned int);
 
@@ -30,7 +36,8 @@ private:
     "4) - List articles",
     "5) - Create article",
     "6) - Delete article",
-    "7) - Get article"
+    "7) - Get article",
+    "0) - Exit"
   };
 
   Connection conn;
